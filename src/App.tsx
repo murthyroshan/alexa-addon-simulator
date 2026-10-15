@@ -9,7 +9,8 @@ import { DEVICES, Device, type DeviceKey, type Light } from './Device';
 import { Connection, endpointFor, type ToolResult, type Traffic, taskSupportOf, textOf, uiResourceOf, visibilityOf } from './mcp';
 import { type ProbeMetrics, probeChecks, withProbe } from './probe';
 import { reportMarkdown } from './report';
-import { ReportView, ScoreRing } from './ReportView';
+import { ReportView } from './ReportView';
+import { Sev } from './Sev';
 import { argsOf, fieldsOf } from './schema';
 import { type Line, TalkPanel } from './TalkPanel';
 import { Compare } from './Compare';
@@ -77,6 +78,11 @@ export function App() {
   const [right, setRight] = useState<'report' | 'result' | 'traffic'>('report');
   const [trafficFilter, setTrafficFilter] = useState<'all' | 'server' | 'card'>('all');
   const [toast, setToast] = useState<string | null>(null);
+  const [appTheme, setAppTheme] = useState<'light' | 'dark'>(() => (stored('sim.ui', 'light') === 'dark' ? 'dark' : 'light'));
+  useEffect(() => {
+    document.documentElement.dataset.theme = appTheme;
+    store('sim.ui', appTheme);
+  }, [appTheme]);
   const [comparing, setComparing] = useState(false);
   const [palette, setPalette] = useState(false);
   // Every turn and tool run, with its parts in time (the Result tab's waterfall).
@@ -479,17 +485,18 @@ export function App() {
       <div className="welcome">
         <header className="top">
           <Brand />
-          <a className="ghost-link" href="https://github.com/murthyroshan/alexa-addon-simulator" target="_blank" rel="noreferrer">
-            GitHub
-          </a>
+          <nav className="top-links">
+            <ThemeToggle theme={appTheme} onChange={setAppTheme} />
+            <a href="https://github.com/murthyroshan/alexa-addon-simulator" target="_blank" rel="noreferrer">
+              Source
+            </a>
+          </nav>
         </header>
         <main className="hero">
-          <div className="hero-copy">
-            <p className="eyebrow">For Alexa+ add-on developers</p>
-            <h1>
-              See your MCP server <span>on an Echo Show</span>
-            </h1>
-            <p className="lede">Talk to it like Alexa+, watch its cards on six Echo screens, and get a readiness score that tells you exactly what to fix: protocol, tools, cards, voice, speed and robustness.</p>
+          <div className="hero-text">
+            <p className="kicker">Open source · MIT · runs on your computer</p>
+            <h1>Test your Alexa+ add-on on an Echo Show.</h1>
+            <p className="lede">Point it at your MCP server. Talk to it the way Alexa+ would, see its cards on seven Echo screens, and get a list of exactly what to fix before you ship.</p>
             <form
               className="connect"
               onSubmit={(e) => {
@@ -497,14 +504,17 @@ export function App() {
                 if (url.trim()) void connect(url.trim());
               }}
             >
-              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://your-server.example.com/mcp" spellCheck={false} aria-label="Your MCP server's URL" autoFocus />
-              <button className="primary big" disabled={state === 'connecting' || !url.trim()}>
+              <label className="sr" htmlFor="server-url">
+                Your MCP server's URL
+              </label>
+              <input id="server-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="http://localhost:3000/mcp" spellCheck={false} autoFocus />
+              <button className="primary" disabled={state === 'connecting' || !url.trim()}>
                 {state === 'connecting' ? 'Connecting…' : 'Connect'}
               </button>
             </form>
             <div className="connect-extra">
               <details>
-                <summary>Headers</summary>
+                <summary>Add a header</summary>
                 <textarea value={headersText} onChange={(e) => setHeadersText(e.target.value)} placeholder="Authorization: Bearer …" rows={2} spellCheck={false} />
               </details>
               {proxyAvailable ? (
@@ -517,46 +527,104 @@ export function App() {
                       store('sim.proxy', e.target.checked ? '1' : '0');
                     }}
                   />
-                  Through the local proxy (no CORS needed)
+                  Use the local proxy (no CORS setup needed)
                 </label>
               ) : (
-                <span className="muted small">No local proxy: your server must allow this page (CORS). Run it with npm start to skip that.</span>
+                <span className="muted">Without the local proxy your server must allow this page (CORS). Run it with npm start to skip that.</span>
               )}
             </div>
             {error && <p className="error">{error}</p>}
-            <div className="examples">
-              <span className="muted small">Or try an example:</span>
+            <p className="example-line">
+              No server at hand?{' '}
               {EXAMPLES.map((ex) => (
-                <button key={ex.url} className="example" onClick={() => void connect(ex.url)} disabled={state === 'connecting'}>
-                  <b>{ex.name}</b>
-                  <span>{ex.what}</span>
+                <button key={ex.url} className="link" onClick={() => void connect(ex.url)} disabled={state === 'connecting'}>
+                  Open {ex.name}
                 </button>
               ))}
-            </div>
+              , a babysitting add-on with cards, tasks and on-screen forms.
+            </p>
           </div>
-          <ul className="features">
-            <li>
-              <b>Talk to it like Alexa+</b>
-              <span>An assistant picks your tools from their descriptions, with voice in and out. Bring your own model key.</span>
-            </li>
-            <li>
-              <b>Your cards, on real screens</b>
-              <span>MCP Apps on Echo Show 5, 8, 10, 15 (and portrait), 21 and Hub. Dark or light, any language, inline or full screen.</span>
-            </li>
-            <li>
-              <b>Checks no one else does</b>
-              <span>Text too small to read across a kitchen, low contrast, tiny touch targets, cards that don't fit, replies too long to hear.</span>
-            </li>
-            <li>
-              <b>Robustness in one click</b>
-              <span>Unknown methods and tools, missing arguments, lost sessions, the event stream: what the 2025-11-25 spec expects.</span>
-            </li>
-            <li>
-              <b>Every message</b>
-              <span>Server and card traffic side by side, forms and links (elicitation), long-running tasks, and a report to paste into your PR.</span>
-            </li>
-          </ul>
+
+          <figure className="specimen" aria-label="What the simulator marks on a card">
+            <div className="specimen-device">
+              <div className="specimen-screen">
+                <div className="sp-top">
+                  <span>6:12</span>
+                  <span className="sp-chip">Sitter mode</span>
+                </div>
+                <div className="sp-card">
+                  <span className="sp-label">Up next</span>
+                  <b>Dinner</b>
+                  <span className="sp-sub">6:30 pm · in 18 min</span>
+                  <span className="sp-fine">
+                    Dal and rice in the fridge, 2 minutes.
+                    <i className="mark m1">1</i>
+                  </span>
+                </div>
+                <div className="sp-side">
+                  <span>Maya · peanut allergy</span>
+                  <span>Bruno · fed at 7</span>
+                </div>
+                <span className="sp-x">
+                  ×<i className="mark m2">2</i>
+                </span>
+                <i className="sp-light" />
+              </div>
+            </div>
+            <ol className="notes">
+              <li>
+                <i className="mark">1</i>
+                <div>
+                  <b>13 px text</b>
+                  <span>Too small to read from the stove. Body text needs 18 px or more.</span>
+                </div>
+              </li>
+              <li>
+                <i className="mark">2</i>
+                <div>
+                  <b>32 × 32 touch target</b>
+                  <span>Wet fingers need 48 × 48.</span>
+                </div>
+              </li>
+              <li>
+                <i className="mark score">87</i>
+                <div>
+                  <b>Readiness, out of 100</b>
+                  <span>Protocol, tools, cards, voice, speed, robustness.</span>
+                </div>
+              </li>
+            </ol>
+          </figure>
         </main>
+
+        <section className="spec-sheet" aria-label="What it does">
+          <dl>
+            <div>
+              <dt>Talk</dt>
+              <dd>An assistant picks your tools from their descriptions, as Alexa+ has to. Voice in and out. Your own Gemini or OpenAI-compatible key, kept in your browser.</dd>
+            </div>
+            <div>
+              <dt>Screens</dt>
+              <dd>MCP Apps on Echo Show 5, 8, 10, 15 (and portrait), 21 and Hub. Dark or light, any language, inline or full screen, or all seven at once.</dd>
+            </div>
+            <div>
+              <dt>Card audit</dt>
+              <dd>Measured inside your card while it runs: text size, contrast (WCAG), touch targets, and whether it fits the screen.</dd>
+            </div>
+            <div>
+              <dt>Robustness</dt>
+              <dd>Unknown methods and tools, missing arguments, lost sessions, the event stream: what MCP 2025-11-25 expects, checked in one go.</dd>
+            </div>
+            <div>
+              <dt>Timeline</dt>
+              <dd>Every turn split into model, your server, the person and speech, so you see where the seconds go.</dd>
+            </div>
+            <div>
+              <dt>Traffic</dt>
+              <dd>Every JSON-RPC message with your server and with your card, forms and links (elicitation), tasks, and a Markdown report for your pull request.</dd>
+            </div>
+          </dl>
+        </section>
       </div>
     );
 
@@ -571,8 +639,8 @@ export function App() {
             {conn.snapshot.serverInfo?.title ?? conn.snapshot.serverInfo?.name} · MCP {conn.snapshot.protocolVersion}
           </span>
           <button className="score-pill" onClick={() => setRight('report')} title="Readiness score">
-            <ScoreRing value={overall} size={34} />
             <span>Readiness</span>
+            <b className={overall === null ? '' : overall >= 85 ? 'good' : overall >= 60 ? 'ok' : 'bad'}>{overall ?? '–'}</b>
           </button>
           <button className="small-btn icon-btn" onClick={() => setComparing(true)} disabled={screen?.kind !== 'card'} title={screen?.kind === 'card' ? 'Your card on every Echo screen' : 'Show a card first'}>
             <Icon name="compare" /> Compare screens
@@ -599,6 +667,7 @@ export function App() {
           >
             Disconnect
           </button>
+          <ThemeToggle theme={appTheme} onChange={setAppTheme} />
         </div>
       </header>
 
@@ -695,7 +764,7 @@ export function App() {
               <ul className="test-list">
                 {conformance.map((c) => (
                   <li key={c.id} className={c.level}>
-                    <i />
+                    <Sev level={c.level} />
                     <div>
                       <b>{c.title}</b>
                       {c.detail && <p>{c.detail}</p>}
@@ -943,6 +1012,14 @@ function median(values: number[]) {
   if (!values.length) return 0;
   const v = [...values].sort((a, b) => a - b);
   return v[Math.floor(v.length / 2)];
+}
+
+function ThemeToggle({ theme, onChange }: { theme: 'light' | 'dark'; onChange: (t: 'light' | 'dark') => void }) {
+  return (
+    <button className="small-btn ghost theme-toggle" onClick={() => onChange(theme === 'light' ? 'dark' : 'light')} title={theme === 'light' ? 'Dark interface' : 'Light interface'} aria-label={theme === 'light' ? 'Switch to the dark interface' : 'Switch to the light interface'}>
+      <Icon name={theme === 'light' ? 'moon' : 'sun'} />
+    </button>
+  );
 }
 
 function Brand() {

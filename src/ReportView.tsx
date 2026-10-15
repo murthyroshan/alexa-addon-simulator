@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Sev } from './Sev';
 import { type Category, type Check, CATEGORIES, categoryOf, score } from './checks';
 
 const tone = (s: number | null) => (s === null ? 'none' : s >= 85 ? 'good' : s >= 60 ? 'ok' : 'bad');
@@ -32,7 +33,7 @@ export function ReportView({ checks, connected, onExport }: { checks: Check[]; c
   return (
     <div className="report">
       <div className="score-head">
-        <ScoreRing value={sc.overall} />
+        <ScoreRing value={sc.overall} size={96} />
         <div className="parts">
           {sc.parts.map((p) => (
             <button key={p.category} className={`part ${tone(p.score)} ${only === p.category ? 'on' : ''}`} onClick={() => setOnly(only === p.category ? null : p.category)} disabled={p.score === null} title={p.score === null ? 'Nothing checked yet' : `${p.fail} to fix, ${p.warn} to improve`}>
@@ -58,7 +59,7 @@ export function ReportView({ checks, connected, onExport }: { checks: Check[]; c
             {mine.map((c) => (
               <details key={c.id} className={`check-row ${c.level}`} open={c.level === 'fail'}>
                 <summary>
-                  <i aria-label={c.level} />
+                  <Sev level={c.level} />
                   <b>{c.title}</b>
                 </summary>
                 {c.detail && <p>{c.detail}</p>}
