@@ -5,7 +5,7 @@ import type { Check } from './checks';
 
 export interface ProbeMetrics {
   viewport: { width: number; height: number };
-  /** Characters of visible text at each font size (CSS px, rounded). */
+  /** Characters of visible text at each font size as drawn (CSS px after any CSS zoom, rounded). */
   textBySize: Record<string, number>;
   /** Visible text whose contrast with its background is below 4.5:1 (3:1 for large text). */
   lowContrast: Array<{ text: string; ratio: number; size: number }>;
@@ -52,6 +52,14 @@ export const PROBE_SCRIPT = `<script>(function () {
     while (layers.length) out = over(layers.pop(), out);
     return out;
   }
+  // CSS zoom (a card drawn on a base canvas and zoomed to the device) leaves font-size as written:
+  // the size on screen is that times every zoom above it.
+  function zoomOf(el) {
+    if (typeof el.currentCSSZoom === 'number') return el.currentCSSZoom;
+    var z = 1;
+    for (var e = el; e && e.nodeType === 1; e = e.parentElement) z *= parseFloat(getComputedStyle(e).zoom) || 1;
+    return z;
+  }
   function visible(el) {
     var r = el.getBoundingClientRect(); if (!r.width || !r.height) return false;
     var s = getComputedStyle(el); return s.visibility !== 'hidden' && s.display !== 'none' && parseFloat(s.opacity) > 0.05;
@@ -63,7 +71,7 @@ export const PROBE_SCRIPT = `<script>(function () {
       var t = n.nodeValue.trim(); if (!t) continue;
       var el = n.parentElement; if (!el || !visible(el)) continue;
       var tag = el.tagName; if (tag === 'SCRIPT' || tag === 'STYLE') continue;
-      var s = getComputedStyle(el), size = Math.round(parseFloat(s.fontSize));
+      var s = getComputedStyle(el), size = Math.round(parseFloat(s.fontSize) * zoomOf(el));
       bySize[size] = (bySize[size] || 0) + t.length;
       var bgc = bgOf(el), fgc = rgba(s.color);
       if (bgc && fgc) {
