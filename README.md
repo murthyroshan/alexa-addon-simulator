@@ -10,6 +10,7 @@
 ![MCP Apps](https://img.shields.io/badge/MCP%20Apps-host-1ac3eb)
 ![Node 22+](https://img.shields.io/badge/node-22%2B-339933)
 [![MIT](https://img.shields.io/badge/license-MIT-lightgrey)](LICENSE)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Alexa%2B%20add--on%20readiness-blue?logo=github)](https://github.com/marketplace/actions/alexa-add-on-readiness)
 
 </div>
 
@@ -74,9 +75,22 @@ Or as a GitHub Action, with the report in the job summary:
 
 It covers Protocol, Tools, Speed, Robustness and what your cards declare. The card audit (text size, contrast, touch targets, fit) needs cards drawn on a screen, so it runs in the app.
 
+## How it compares
+
+Other builders made good tools for the same gap while Alexa+ add-ons are closed to developers. They answer different questions, and work well together:
+
+| Tool | What it's for (from its README) | Use it with this one when |
+| --- | --- | --- |
+| **alexa-addon-simulator** (this) | Your MCP Apps cards on **seven Echo screen sizes** side by side, a **card audit measured inside the card** (text size after CSS zoom, contrast, touch targets, fit), a **readiness score** in six parts, robustness tests, voice with your own model key, and the same checks as a **[GitHub Action on the Marketplace](https://github.com/marketplace/actions/alexa-add-on-readiness)** | — |
+| [addon-sim](https://github.com/pauleke65/addon-sim) | An assistant-side simulator: MCP Apps host, form and URL elicitation, smart display and speaker frames, Polly voice, YAML conversation scripts and an inspector | You want scripted conversations replayed headless |
+| [alexa-plus-mcp-checks](https://github.com/ubmids/alexa-plus-mcp-checks) | A pytest plugin and GitHub Action for Alexa+ authentication rules (a 401 without `WWW-Authenticate`, S256, metadata) and MCP transport rules | You want the authentication checks in Python CI |
+| [alexa-skill-mcp-bridge](https://github.com/KayLerch/alexa-skill-mcp-bridge) | Puts any MCP server on a physical Alexa device through an Alexa Skill and an agent on Amazon Bedrock AgentCore | You want to demo on a real device |
+
+What only this one does: draws your cards at each Echo's real size and measures what a person at the stove would actually see, then turns that into a score your CI can fail on.
+
 ## Built for While You're Out
 
-This simulator grew out of [While You're Out](https://github.com/murthyroshan/while-youre-out), an Alexa+ add-on that turns the kitchen Echo Show into a babysitter's guide for the evening. It was built for the Build, Ship, Shape: Amazon Developer Hackathon. With no Alexa+ host to test on, we built one, then made it work with any MCP server.
+This simulator grew out of [While You're Out](https://github.com/murthyroshan/while-youre-out), an Alexa+ add-on that turns the kitchen Echo Show into a babysitter's guide for the evening. It was built for the Build, Ship, Shape: Amazon Developer Hackathon. With no Alexa+ host to test on, I built a stand-in for one, then made it work with any MCP server.
 
 Running it on While You're Out found four problems, all since fixed there: tool parameters without descriptions, tools without safety hints, card text that shrank on the smallest Echo Show, and a card that shrank its text in portrait on the Echo Show 15. It works the other way too: that card is drawn on Alexa's 768-wide base canvas and zoomed for each device, which taught the card audit to measure text as drawn, after CSS `zoom`.
 
