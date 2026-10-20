@@ -212,7 +212,7 @@ test('the Markdown report has the score, the parts, and every check', () => {
   const snapshot = { url: 'https://x/mcp', protocolVersion: '2025-11-25', serverInfo: { name: 'pizza', title: 'Pizza Night' }, tools: [tool({ name: 'a' })], resources: [], timings: { initializeMs: 1, listToolsMs: 1 } } as ServerSnapshot;
   const md = reportMarkdown(snapshot, [{ id: 'protocol', level: 'pass', title: 'MCP 2025-11-25' }, { id: 'descriptions', level: 'warn', title: '1 tool has no description', tools: ['a'] }], new Date('2026-10-16T00:00:00Z'));
   assert.match(md, /^# Alexa\+ readiness: Pizza Night/);
-  assert.match(md, /\*\*Score: 94\/100\*\* · MCP 2025-11-25 · 1 tools · 0 cards · 2026-10-16/);
+  assert.match(md, /\*\*Score: 94\/100\*\* · MCP 2025-11-25 · 1 tool · 0 cards · 2026-10-16/);
   assert.match(md, /\| Tools \| 88 \| 0 \| 1 \|/);
   assert.match(md, /- ⚠️ \*\*1 tool has no description\*\* _\(a\)_/);
   assert.match(md, /not an Amazon certification/);

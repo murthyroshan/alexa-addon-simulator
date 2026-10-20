@@ -19,7 +19,8 @@
     "build": "tsc --noEmit && vite build",
     "start": "node server/start.mjs",
     "test": "tsx --test test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check": "tsx src/cli.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "5.3.0",

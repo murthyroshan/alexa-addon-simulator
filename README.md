@@ -53,6 +53,27 @@ Paste your server's Streamable HTTP URL (for example `http://localhost:8787/mcp`
 | **Traffic** | Every JSON-RPC message, between the simulator and your server and between your card and the simulator. |
 | **Command palette** | Ctrl+K: run any tool, switch device, run the tests, copy the report. |
 
+## In CI
+
+The same checks run without a browser, so your add-on's readiness can fail a build:
+
+```bash
+npm run check -- https://your-addon.example/mcp --min-score 80 --report readiness.md
+```
+
+Or as a GitHub Action, with the report in the job summary:
+
+```yaml
+- uses: murthyroshan/alexa-addon-simulator@v0.1.0
+  with:
+    url: https://your-addon.example/mcp
+    min-score: 80
+    headers: |
+      Authorization: Bearer ${{ secrets.ADDON_TOKEN }}
+```
+
+It covers Protocol, Tools, Speed, Robustness and what your cards declare. The card audit (text size, contrast, touch targets, fit) needs cards drawn on a screen, so it runs in the app.
+
 ## Built for While You're Out
 
 This simulator grew out of [While You're Out](https://github.com/murthyroshan/while-youre-out), an Alexa+ add-on that turns the kitchen Echo Show into a babysitter's guide for the evening. It was built for the Build, Ship, Shape: Amazon Developer Hackathon. With no Alexa+ host to test on, we built one, then made it work with any MCP server.

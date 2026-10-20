@@ -1,0 +1,42 @@
+name: Alexa+ add-on readiness
+description: Check an MCP server the way Alexa+ uses it (protocol, tools, cards, speed, robustness) and fail the build below a score.
+author: murthyroshan
+branding:
+  icon: check-circle
+  color: blue
+inputs:
+  url:
+    description: The add-on's Streamable HTTP MCP endpoint, for example https://example.com/mcp
+    required: true
+  min-score:
+    description: Fail when the readiness score (out of 100) is below this
+    required: false
+    default: '0'
+  headers:
+    description: 'Extra request headers, one per line, like "Authorization: Bearer <token>". Pass tokens from repository secrets.'
+    required: false
+    default: ''
+outputs:
+  report:
+    description: Path to the Markdown report
+    value: ${{ steps.check.outputs.report }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - name: Install the checker
+      shell: bash
+      run: npm ci --prefix "$GITHUB_ACTION_PATH" --no-audit --no-fund --loglevel=error
+    - name: Check readiness
+      id: check
+      shell: bash
+      env:
+        READINESS_HEADERS: ${{ inputs.headers }}
+        INPUT_URL: ${{ inputs.url }}
+        INPUT_MIN_SCORE: ${{ inputs.min-score }}
+      run: |
+        report="$RUNNER_TEMP/alexa-addon-readiness.md"
+        "$GITHUB_ACTION_PATH/node_modules/.bin/tsx" "$GITHUB_ACTION_PATH/src/cli.ts" "$INPUT_URL" --min-score "$INPUT_MIN_SCORE" --report "$report"
+        echo "report=$report" >> "$GITHUB_OUTPUT"

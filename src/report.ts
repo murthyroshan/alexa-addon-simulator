@@ -10,7 +10,7 @@ export function reportMarkdown(s: ServerSnapshot, checks: Check[], when = new Da
   const lines = [
     `# Alexa+ readiness: ${name}`,
     '',
-    `**Score: ${sc.overall ?? '–'}/100** · MCP ${s.protocolVersion ?? 'unknown'} · ${s.tools.length} tools · ${s.resources.length} cards · ${when.toISOString().slice(0, 10)}`,
+    `**Score: ${sc.overall ?? '–'}/100** · MCP ${s.protocolVersion ?? 'unknown'} · ${s.tools.length} ${s.tools.length === 1 ? 'tool' : 'tools'} · ${s.resources.length} ${s.resources.length === 1 ? 'card' : 'cards'} · ${when.toISOString().slice(0, 10)}`,
     '',
     `Server: \`${s.url}\``,
     '',
