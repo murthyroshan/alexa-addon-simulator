@@ -33,7 +33,7 @@ Paste your server's Streamable HTTP URL (for example `http://localhost:8787/mcp`
 <td colspan="2"><img src="media/workspace.png" alt="The workspace: the tool list, an MCP Apps card on an Echo Show 15, and the timeline of the call"><br><b>Your card on an Echo Show.</b> Run any tool, or just talk to it. The card renders in a sandboxed frame at the device's real size, and the timeline shows where every second went: the model, your server, the person, speech.</td>
 </tr>
 <tr>
-<td width="50%"><img src="media/report.png" alt="The readiness score: 98 of 100, in six parts, with robustness tests"><br><b>Readiness, out of 100.</b> Protocol, tools, cards, voice, speed and robustness, each finding with why it matters and what to do. Copy it as Markdown for a pull request.</td>
+<td width="50%"><img src="media/report.png" alt="The readiness score: 100 of 100, in six parts, with robustness tests"><br><b>Readiness, out of 100.</b> Protocol, tools, cards, voice, speed and robustness, each finding with why it matters and what to do. Copy it as Markdown for a pull request.</td>
 <td width="50%"><img src="media/compare.png" alt="The same card on all seven Echo screens, each measured"><br><b>Every Echo screen at once.</b> The same card on seven devices, each measured: does it fit, how much of the text is readable from across a kitchen.</td>
 </tr>
 </table>
