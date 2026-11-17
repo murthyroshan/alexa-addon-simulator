@@ -38,7 +38,7 @@ const store = (k: string, v: string) => {
   }
 };
 
-const EXAMPLES = [{ name: "While You're Out", what: 'Babysitting add-on · MCP Apps cards, tasks, elicitation', url: 'https://while-youre-out-wpj3.onrender.com/mcp' }];
+const EXAMPLES = [{ name: "While You're Out", what: 'Babysitting add-on · MCP Apps cards, tasks, elicitation', url: 'https://while-youre-out-demo.onrender.com/mcp' }];
 const LOCALES = ['en-US', 'en-GB', 'en-IN', 'hi-IN', 'es-US', 'de-DE', 'fr-FR', 'ja-JP'];
 let nextId = 1;
 
